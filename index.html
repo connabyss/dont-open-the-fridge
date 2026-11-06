@@ -3,96 +3,234 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090a10">
+  <meta name="theme-color" content="#070b12">
   <title>Don't Open the Fridge</title>
   <style>
     :root {
       color-scheme: dark;
-      --ink: #e8e4dc;
-      --muted: #aaa5b5;
-      --glow: #b6f1dc;
-      --violet: #c5a9ff;
-      --panel: rgba(15, 16, 25, .88);
-      --line: rgba(182, 241, 220, .2);
+      --bg-1: #050a12;
+      --bg-2: #0a1019;
+      --panel: rgba(9, 15, 22, 0.78);
+      --panel-strong: rgba(10, 17, 24, 0.95);
+      --ink: #e9e4db;
+      --muted: #b0b9c1;
+      --glow: #bfead9;
+      --glow-soft: rgba(191, 234, 217, 0.36);
+      --violet: #ba9dfb;
+      --line: rgba(153, 176, 196, 0.2);
+      --shadow: rgba(0, 0, 0, 0.55);
     }
+
     * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg-1);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
     body {
       min-height: 100vh;
-      margin: 0;
       display: grid;
       place-items: center;
-      padding: 28px 16px;
-      overflow-x: hidden;
-      color: var(--ink);
+      padding: 28px 18px;
       background:
-        radial-gradient(ellipse at 50% 100%, rgba(52, 74, 71, .28), transparent 48%),
-        radial-gradient(ellipse at 80% 10%, rgba(77, 50, 103, .18), transparent 38%),
-        #090a10;
-      font: 17px/1.7 Georgia, "Times New Roman", serif;
+        radial-gradient(circle at 50% 85%, rgba(29, 45, 55, 0.48), transparent 32%),
+        radial-gradient(circle at 15% 15%, rgba(76, 47, 92, 0.16), transparent 30%),
+        linear-gradient(180deg, #04070d 0%, #070b12 42%, #04070d 100%);
+      position: relative;
+      overflow: hidden;
     }
+
     body::before {
+      content: "";
       position: fixed;
       inset: 0;
-      z-index: -1;
       pointer-events: none;
-      content: "";
-      opacity: .14;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      background-image:
+        repeating-radial-gradient(circle at 20% 20%, rgba(255,255,255,0.02) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012), rgba(255,255,255,0.012) 1px, transparent 1px, transparent 4px);
+      opacity: 0.8;
+      mix-blend-mode: screen;
     }
+
     .game {
       width: min(100%, 760px);
       border: 1px solid var(--line);
-      background: var(--panel);
-      box-shadow: 0 24px 100px rgba(0, 0, 0, .55), 0 0 60px rgba(140, 217, 193, .04);
-      backdrop-filter: blur(8px);
+      background: rgba(9, 15, 22, 0.8);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.01), 0 20px 80px rgba(0,0,0,0.56);
+      backdrop-filter: blur(3px);
     }
-    header { padding: 30px clamp(22px, 6vw, 52px) 18px; border-bottom: 1px solid rgba(255,255,255,.07); }
-    .eyebrow { margin: 0 0 7px; color: var(--glow); font: 700 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .22em; text-transform: uppercase; }
-    h1 { margin: 0; font-size: clamp(29px, 6vw, 43px); font-weight: 400; line-height: 1.12; letter-spacing: -.035em; }
-    .clock { color: var(--muted); margin: 12px 0 0; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
-    main { padding: 30px clamp(22px, 6vw, 52px) 34px; }
-    .scene-count { margin: 0 0 18px; color: var(--violet); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .18em; text-transform: uppercase; }
-    .story { min-height: 154px; }
-    .story p { margin: 0 0 15px; }
-    .story p:last-child { margin-bottom: 0; }
-    .choices { display: grid; gap: 10px; margin-top: 27px; }
-    button { font: inherit; }
-    .choice, .restart {
-      text-align: left;
+
+    header {
+      padding: 26px clamp(22px, 4vw, 46px) 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font: 700 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.22em;
+      color: var(--glow);
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 60px);
+      line-height: 0.96;
+      letter-spacing: -0.06em;
+      font-weight: 400;
+      font-style: italic;
+      color: #f1ece3;
+    }
+
+    .clock {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font: 700 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    main {
+      padding: 22px clamp(22px, 4vw, 42px) 18px;
+    }
+
+    .scene-count {
+      margin: 0 0 18px;
+      color: var(--violet);
+      font: 700 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .story {
+      min-height: 150px;
+      padding-bottom: 6px;
+    }
+
+    .story p {
+      margin: 0 0 14px;
+      font-size: clamp(17px, 2vw, 25px);
+      line-height: 1.45;
+      color: rgba(233, 228, 219, 0.9);
+    }
+
+    .story p:last-child {
+      margin-bottom: 0;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .choice,
+    .restart {
+      appearance: none;
+      width: 100%;
+      border: 1px solid rgba(178, 210, 221, 0.26);
+      background: rgba(255,255,255,0.02);
       color: var(--ink);
-      border: 1px solid rgba(197, 169, 255, .25);
-      background: rgba(255,255,255,.025);
+      text-align: left;
+      padding: 12px 14px 12px 14px;
       cursor: pointer;
-      transition: border-color .2s, background .2s, transform .2s;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      font: 400 18px/1.45 Georgia, "Times New Roman", serif;
+      position: relative;
+      overflow: hidden;
     }
-    .choice { padding: 12px 15px; }
-    .choice::before { content: "↳  "; color: var(--glow); }
-    .choice:hover, .choice:focus-visible, .restart:hover, .restart:focus-visible {
+
+    .choice::before,
+    .restart::before {
+      content: "▸";
+      display: inline-block;
+      margin-right: 10px;
+      color: var(--glow);
+      opacity: 0.9;
+    }
+
+    .choice:hover,
+    .choice:focus-visible,
+    .restart:hover,
+    .restart:focus-visible {
       outline: none;
-      border-color: var(--glow);
-      background: rgba(182, 241, 220, .08);
-      transform: translateX(3px);
+      transform: translateX(2px);
+      border-color: rgba(191,234,217,0.7);
+      background: rgba(191,234,217,0.05);
+      box-shadow: inset 0 0 0 1px rgba(191,234,217,0.08);
     }
-    .ending-title { color: var(--glow); font-size: 24px; font-style: italic; margin-bottom: 13px !important; }
-    .restart { margin-top: 27px; padding: 10px 15px; color: var(--glow); font: 700 12px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; }
-    footer { padding: 13px 22px; border-top: 1px solid rgba(255,255,255,.07); color: #777682; text-align: center; font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+
+    .ending-title {
+      margin: 0 0 16px !important;
+      font-size: clamp(25px, 4vw, 42px) !important;
+      line-height: 1.05 !important;
+      font-style: italic;
+      color: var(--glow);
+    }
+
+    .restart {
+      width: auto;
+      min-width: 180px;
+      margin-top: 24px;
+      padding-right: 18px;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 700;
+      background: rgba(191,234,217,0.02);
+    }
+
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 14px 18px 16px;
+      text-align: center;
+      color: rgba(176, 185, 193, 0.7);
+      font: 700 10px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 640px) {
+      .game {
+        width: min(100%, 610px);
+      }
+      .story p {
+        font-size: 18px;
+      }
+      .choice,
+      .restart {
+        font-size: 17px;
+      }
+      .clock, .scene-count, .eyebrow, footer {
+        letter-spacing: 0.12em;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="game">
+  <div class="game" role="application" aria-label="Don't Open the Fridge interactive story">
     <header>
       <p class="eyebrow">A small domestic nightmare</p>
       <h1>Don't Open the Fridge</h1>
-      <p class="clock">3:00 AM · THE HOUSE IS LISTENING</p>
+      <p class="clock">3:00 AM • THE HOUSE IS LISTENING</p>
     </header>
+
     <main aria-live="polite" aria-atomic="true">
       <p class="scene-count" id="scene-count"></p>
       <section class="story" id="story"></section>
-      <nav class="choices" id="choices" aria-label="What do you do?"></nav>
+      <nav class="choices" id="choices" aria-label="Choose what to do next"></nav>
     </main>
+
     <footer>THE LIGHT INSIDE IS NOT FOR YOU</footer>
   </div>
+
   <script>
     const scenes = {
       bed: {
@@ -104,7 +242,7 @@
         choices: [
           ["Go see what is making that sound.", "hall"],
           ["Pull the blanket over your head and negotiate with your stomach.", "blanket"],
-          ["Text the group chat: 'does your fridge ever purr?'6", "phone"]
+          ["Text the group chat: 'does your fridge ever purr?'", "phone"]
         ]
       },
       hall: {
@@ -194,97 +332,136 @@
       blanket: {
         ending: true,
         title: "The Blanket Burrito",
-        paragraphs: ["You wrap yourself into a protective cocoon and sleep through the humming. In the morning, the fridge is quiet. Your stomach has filed a formal complaint, but the blanket has promoted itself to head of security.", "Somewhere, deep in the kitchen, an ice cube sighs."]
+        paragraphs: [
+          "You wrap yourself into a protective cocoon and sleep through the humming. In the morning, the fridge is quiet. Your stomach has filed a formal complaint, but the blanket has promoted itself to head of security.",
+          "Somewhere, deep in the kitchen, an ice cube sighs."
+        ]
       },
       phone: {
         ending: true,
         title: "Read at 3:07 AM",
-        paragraphs: ["The group chat answers instantly. Everyone types at once: 'DON'T OPEN IT.' Then your phone's autocorrect changes the message to 'WE ARE IN THE CRISPER.'", "A typing bubble appears from a number saved as YOU (FRIDGE). You put the phone facedown. It keeps buzzing, politely."]
+        paragraphs: [
+          "The group chat answers instantly. Everyone types at once: 'DON'T OPEN IT.' Then your phone's autocorrect changes the message to 'WE ARE IN THE CRISPER.'",
+          "A typing bubble appears from a number saved as YOU (FRIDGE). You put the phone facedown. It keeps buzzing, politely."
+        ]
       },
       mirrorask: {
         ending: true,
         title: "The Mirror's Day Off",
-        paragraphs: ["You ask the mirror what it knows. It points at your pajamas, shrugs, and steps out of the glass to go make tea. The reflection leaves you in charge of the bathroom until further notice.", "You never do learn what the fridge wanted. The mirror does, but it's on a strict no-spoilers policy."]
+        paragraphs: [
+          "You ask the mirror what it knows. It points at your pajamas, shrugs, and steps out of the glass to go make tea. The reflection leaves you in charge of the bathroom until further notice.",
+          "You never do learn what the fridge wanted. The mirror does, but it's on a strict no-spoilers policy."
+        ]
       },
       knock: {
         ending: true,
         title: "Knock-Knock, Who's There?",
-        paragraphs: ["You knock twice. Something knocks twice back, then whispers, 'Interrupting cow.' The door opens a crack. A tiny cow in a chef's hat trots out, steals your slipper, and disappears under the fridge.", "The humming returns to normal. You have been outsmarted by dairy-adjacent comedy."]
+        paragraphs: [
+          "You knock twice. Something knocks twice back, then whispers, 'Interrupting cow.' The door opens a crack. A tiny cow in a chef's hat trots out, steals your slipper, and disappears under the fridge.",
+          "The humming returns to normal. You have been outsmarted by dairy-adjacent comedy."
+        ]
       },
       cereal: {
         ending: true,
         title: "Breakfast of Champions",
-        paragraphs: ["The cereal is delicious. It tastes like cinnamon, static, and a memory of winning a spelling bee. The raccoon mascot gives you a solemn nod.", "You are no longer hungry. You are now the proud regional spokesperson for OAT O'S, a cereal that does not exist in daylight."]
+        paragraphs: [
+          "The cereal is delicious. It tastes like cinnamon, static, and a memory of winning a spelling bee. The raccoon mascot gives you a solemn nod.",
+          "You are no longer hungry. You are now the proud regional spokesperson for OAT O'S, a cereal that does not exist in daylight."
+        ]
       },
       leftovers: {
         ending: true,
         title: "Leftovers, Found",
-        paragraphs: ["'We made a little society,' your voice calls from the fridge. 'The lasagna is mayor. The yogurt is a poet.' You decide not to interrupt local government.", "A container of last week's noodles slides out onto the shelf. It wears a paper crown. You close the door with a respectful bow."]
+        paragraphs: [
+          "'We made a little society,' your voice calls from the fridge. 'The lasagna is mayor. The yogurt is a poet.' You decide not to interrupt local government.",
+          "A container of last week's noodles slides out onto the shelf. It wears a paper crown. You close the door with a respectful bow."
+        ]
       },
       apology: {
         ending: true,
         title: "A Chilling Truce",
-        paragraphs: ["You apologize. The fridge gives one soft, forgiving beep. A perfectly wrapped slice of cake appears on the counter, labeled 'FOR THE APOLOGY.'", "You eat it in the dark. It tastes faintly of the sea and excellent conflict resolution."]
+        paragraphs: [
+          "You apologize. The fridge gives one soft, forgiving beep. A perfectly wrapped slice of cake appears on the counter, labeled 'FOR THE APOLOGY.'",
+          "You eat it in the dark. It tastes faintly of the sea and excellent conflict resolution."
+        ]
       },
       inside: {
         ending: true,
         title: "The Cold Open",
-        paragraphs: ["The fridge opens onto a moonlit beach. Your leftovers sit in tiny beach chairs. The milk wears sunglasses. A version of you waves from the horizon, holding a sandwich and a clipboard.", "You step in. The door closes. In the morning, the fridge hums normally—and one magnet now says 'BACK SOON.'"]
+        paragraphs: [
+          "The fridge opens onto a moonlit beach. Your leftovers sit in tiny beach chairs. The milk wears sunglasses. A version of you waves from the horizon, holding a sandwich and a clipboard.",
+          "You step in. The door closes. In the morning, the fridge hums normally—and one magnet now says 'BACK SOON.'"
+        ]
       },
       manager: {
         ending: true,
         title: "Your Call Is Important to Us",
-        paragraphs: ["A little bell rings inside the fridge. Hold music plays: a kazoo rendition of a song you almost remember. A customer-service voice thanks you for your patience and offers a coupon for one (1) haunted pudding.", "You accept. The pudding accepts you back. Nobody is sure what that means."]
+        paragraphs: [
+          "A little bell rings inside the fridge. Hold music plays: a kazoo rendition of a song you almost remember. A customer-service voice thanks you for your patience and offers a coupon for one (1) haunted pudding.",
+          "You accept. The pudding accepts you back. Nobody is sure what that means."
+        ]
       },
       unplug: {
         ending: true,
         title: "Power Down",
-        paragraphs: ["You pull the plug. The humming stops. For one perfect second, the kitchen is silent. Then the fridge whispers, 'Battery backup,' and displays a tiny green smiley face.", "You plug it back in. The smiley face changes to a thumbs-up. You decide that tomorrow is a good day to buy a mini fridge."]
+        paragraphs: [
+          "You pull the plug. The humming stops. For one perfect second, the kitchen is silent. Then the fridge whispers, 'Battery backup,' and displays a tiny green smiley face.",
+          "You plug it back in. The smiley face changes to a thumbs-up. You decide that tomorrow is a good day to buy a mini fridge."
+        ]
       }
     };
 
-    const story = document.getElementById("story");
-    const choices = document.getElementById("choices");
-    const count = document.getElementById("scene-count");
+    const story = document.getElementById('story');
+    const choices = document.getElementById('choices');
+    const count = document.getElementById('scene-count');
 
-    function showScene(id) {
+    function renderScene(id) {
       const scene = scenes[id];
-      story.replaceChildren();
-      choices.replaceChildren();
-      count.textContent = scene.ending ? "— THE END —" : `SCENE ${scene.number} / 8`;
+      if (!scene) return;
+
+      story.innerHTML = '';
+      choices.innerHTML = '';
+
+      count.textContent = scene.ending ? '— THE END —' : `SCENE ${scene.number} / 8`;
+
       if (scene.ending) {
-        const title = document.createElement("p");
-        title.className = "ending-title";
+        const title = document.createElement('p');
+        title.className = 'ending-title';
         title.textContent = scene.title;
-        story.append(title);
+        story.appendChild(title);
       }
-      scene.paragraphs.forEach(text => {
-        const paragraph = document.createElement("p");
-        paragraph.textContent = text;
-        story.append(paragraph);
+
+      scene.paragraphs.forEach((text) => {
+        const p = document.createElement('p');
+        p.textContent = text;
+        story.appendChild(p);
       });
+
       if (scene.ending) {
-        const restart = document.createElement("button");
-        restart.className = "restart";
-        restart.type = "button";
-        restart.textContent = "↺ Start over";
-        restart.addEventListener("click", () => showScene("bed"));
-        choices.append(restart);
+        const restart = document.createElement('button');
+        restart.type = 'button';
+        restart.className = 'restart';
+        restart.textContent = 'Start over';
+        restart.addEventListener('click', () => renderScene('bed'));
+        choices.appendChild(restart);
         restart.focus();
         return;
       }
-      scene.choices.forEach(([label, next]) => {
-        const button = document.createElement("button");
-        button.className = "choice";
-        button.type = "button";
+
+      scene.choices.forEach(([label, nextId]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'choice';
         button.textContent = label;
-        button.addEventListener("click", () => showScene(next));
-        choices.append(button);
+        button.addEventListener('click', () => renderScene(nextId));
+        choices.appendChild(button);
       });
-      choices.querySelector("button")?.focus();
+
+      const firstChoice = choices.querySelector('.choice');
+      if (firstChoice) firstChoice.focus();
     }
 
-    showScene("bed");
+    renderScene('bed');
   </script>
 </body>
 </html>
