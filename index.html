@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090a10">
+  <title>Don't Open the Fridge</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #e8e4dc;
+      --muted: #aaa5b5;
+      --glow: #b6f1dc;
+      --violet: #c5a9ff;
+      --panel: rgba(15, 16, 25, .88);
+      --line: rgba(182, 241, 220, .2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 50% 100%, rgba(52, 74, 71, .28), transparent 48%),
+        radial-gradient(ellipse at 80% 10%, rgba(77, 50, 103, .18), transparent 38%),
+        #090a10;
+      font: 17px/1.7 Georgia, "Times New Roman", serif;
+    }
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      content: "";
+      opacity: .14;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+    }
+    .game {
+      width: min(100%, 760px);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 24px 100px rgba(0, 0, 0, .55), 0 0 60px rgba(140, 217, 193, .04);
+      backdrop-filter: blur(8px);
+    }
+    header { padding: 30px clamp(22px, 6vw, 52px) 18px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .eyebrow { margin: 0 0 7px; color: var(--glow); font: 700 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .22em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(29px, 6vw, 43px); font-weight: 400; line-height: 1.12; letter-spacing: -.035em; }
+    .clock { color: var(--muted); margin: 12px 0 0; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
+    main { padding: 30px clamp(22px, 6vw, 52px) 34px; }
+    .scene-count { margin: 0 0 18px; color: var(--violet); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .18em; text-transform: uppercase; }
+    .story { min-height: 154px; }
+    .story p { margin: 0 0 15px; }
+    .story p:last-child { margin-bottom: 0; }
+    .choices { display: grid; gap: 10px; margin-top: 27px; }
+    button { font: inherit; }
+    .choice, .restart {
+      text-align: left;
+      color: var(--ink);
+      border: 1px solid rgba(197, 169, 255, .25);
+      background: rgba(255,255,255,.025);
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .2s;
+    }
+    .choice { padding: 12px 15px; }
+    .choice::before { content: "↳  "; color: var(--glow); }
+    .choice:hover, .choice:focus-visible, .restart:hover, .restart:focus-visible {
+      outline: none;
+      border-color: var(--glow);
+      background: rgba(182, 241, 220, .08);
+      transform: translateX(3px);
+    }
+    .ending-title { color: var(--glow); font-size: 24px; font-style: italic; margin-bottom: 13px !important; }
+    .restart { margin-top: 27px; padding: 10px 15px; color: var(--glow); font: 700 12px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; }
+    footer { padding: 13px 22px; border-top: 1px solid rgba(255,255,255,.07); color: #777682; text-align: center; font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="game">
+    <header>
+      <p class="eyebrow">A small domestic nightmare</p>
+      <h1>Don't Open the Fridge</h1>
+      <p class="clock">3:00 AM · THE HOUSE IS LISTENING</p>
+    </header>
+    <main aria-live="polite" aria-atomic="true">
+      <p class="scene-count" id="scene-count"></p>
+      <section class="story" id="story"></section>
+      <nav class="choices" id="choices" aria-label="What do you do?"></nav>
+    </main>
+    <footer>THE LIGHT INSIDE IS NOT FOR YOU</footer>
+  </div>
+  <script>
+    const scenes = {
+      bed: {
+        number: 1,
+        paragraphs: [
+          "At 3 AM, hunger is less a feeling than a tiny landlord banging a spoon against your ribs. You sit up. From the kitchen comes the refrigerator's familiar hum—except it has acquired a second note, low and wet, like a cello played underwater.",
+          "Your stomach votes unanimously for investigation."
+        ],
+        choices: [
+          ["Go see what is making that sound.", "hall"],
+          ["Pull the blanket over your head and negotiate with your stomach.", "blanket"],
+          ["Text the group chat: 'does your fridge ever purr?'6", "phone"]
+        ]
+      },
+      hall: {
+        number: 2,
+        paragraphs: [
+          "The hallway is longer than it was at bedtime. Your bare feet find every cold floorboard. The kitchen doorway glows faintly green, though the fridge light has never reached this far.",
+          "Behind you, the bedroom door clicks shut with the delicate finality of a very small judge."
+        ],
+        choices: [
+          ["Follow the green glow into the kitchen.", "kitchen"],
+          ["Check the bathroom mirror for signs of sleep paralysis.", "mirror"],
+          ["Return to bed. The hallway can keep its opinions.", "bed"]
+        ]
+      },
+      kitchen: {
+        number: 3,
+        paragraphs: [
+          "The kitchen is colder than the rest of the house. The fridge vibrates against its little magnets: a smiling lemon, a pizza coupon, and a child's drawing of a tall white rectangle with too many teeth.",
+          "The new note in its hum almost sounds like your name. Almost."
+        ],
+        choices: [
+          ["Read the child's drawing more carefully.", "drawing"],
+          ["Check the pantry for a snack that doesn't require eye contact.", "pantry"],
+          ["Put your ear against the fridge door.", "ear"]
+        ]
+      },
+      mirror: {
+        number: 4,
+        paragraphs: [
+          "Your reflection is a second late. It looks exhausted, which is fair, and points toward the kitchen behind you. You turn around. The hallway is empty.",
+          "In the mirror, your reflection mouths: DON'T. Then it yawns and wanders out of frame, presumably to bed."
+        ],
+        choices: [
+          ["Ask the mirror what it knows.", "mirrorask"],
+          ["Head for the kitchen anyway.", "kitchen"],
+          ["Take the reflection's advice and go back to bed.", "bed"]
+        ]
+      },
+      drawing: {
+        number: 5,
+        paragraphs: [
+          "On the back of the drawing, in crayon, someone has written: 'IF IT SAYS YOUR NAME, IT'S JUST THE ICE MAKER.' Beneath that: 'THE ICE MAKER DOESN'T KNOW YOUR NAME.'",
+          "The fridge hum stops. From inside: three polite knocks."
+        ],
+        choices: [
+          ["Knock back. You were raised to be polite.", "knock"],
+          ["Take the drawing and retreat to the pantry.", "pantry"],
+          ["Ask the fridge what it wants.", "door"]
+        ]
+      },
+      pantry: {
+        number: 6,
+        paragraphs: [
+          "The pantry smells of cinnamon and old cardboard. A box of cereal rattles by itself. Its mascot, a cartoon raccoon in a tiny nightcap, turns its printed eyes toward you.",
+          "'Don't open the fridge,' it says. The box is labeled OAT O'S. You have never bought OAT O'S."
+        ],
+        choices: [
+          ["Eat a handful of suspiciously confident cereal.", "cereal"],
+          ["Ask the cereal box why it can talk.", "cereal"],
+          ["Go back to the fridge. This is somehow worse.", "door"]
+        ]
+      },
+      ear: {
+        number: 7,
+        paragraphs: [
+          "Against the cold metal, you hear a beach. Waves. Seagulls. Someone calling bingo numbers. Then a voice, perfectly clear: 'We have your leftovers.'",
+          "You recognize the voice as your own, but with the confidence you usually reserve for ordering pizza."
+        ],
+        choices: [
+          ["Open the door just an inch.", "door"],
+          ["Ask what happened to the leftovers.", "leftovers"],
+          ["Apologize to the fridge and back away slowly.", "apology"]
+        ]
+      },
+      door: {
+        number: 8,
+        paragraphs: [
+          "The handle is warm. The hum has become a choir of tiny refrigerator magnets singing a hymn about dairy. A thread of blue light leaks around the seal.",
+          "Whatever is in there has waited patiently through every grocery run, every midnight snack, every time you said 'I'll clean this tomorrow.' It sounds delighted to meet you."
+        ],
+        choices: [
+          ["Open it. You are hungry, and curiosity is a food group.", "inside"],
+          ["Demand to speak to the manager.", "manager"],
+          ["Unplug the fridge and end this haunting responsibly.", "unplug"]
+        ]
+      },
+      blanket: {
+        ending: true,
+        title: "The Blanket Burrito",
+        paragraphs: ["You wrap yourself into a protective cocoon and sleep through the humming. In the morning, the fridge is quiet. Your stomach has filed a formal complaint, but the blanket has promoted itself to head of security.", "Somewhere, deep in the kitchen, an ice cube sighs."]
+      },
+      phone: {
+        ending: true,
+        title: "Read at 3:07 AM",
+        paragraphs: ["The group chat answers instantly. Everyone types at once: 'DON'T OPEN IT.' Then your phone's autocorrect changes the message to 'WE ARE IN THE CRISPER.'", "A typing bubble appears from a number saved as YOU (FRIDGE). You put the phone facedown. It keeps buzzing, politely."]
+      },
+      mirrorask: {
+        ending: true,
+        title: "The Mirror's Day Off",
+        paragraphs: ["You ask the mirror what it knows. It points at your pajamas, shrugs, and steps out of the glass to go make tea. The reflection leaves you in charge of the bathroom until further notice.", "You never do learn what the fridge wanted. The mirror does, but it's on a strict no-spoilers policy."]
+      },
+      knock: {
+        ending: true,
+        title: "Knock-Knock, Who's There?",
+        paragraphs: ["You knock twice. Something knocks twice back, then whispers, 'Interrupting cow.' The door opens a crack. A tiny cow in a chef's hat trots out, steals your slipper, and disappears under the fridge.", "The humming returns to normal. You have been outsmarted by dairy-adjacent comedy."]
+      },
+      cereal: {
+        ending: true,
+        title: "Breakfast of Champions",
+        paragraphs: ["The cereal is delicious. It tastes like cinnamon, static, and a memory of winning a spelling bee. The raccoon mascot gives you a solemn nod.", "You are no longer hungry. You are now the proud regional spokesperson for OAT O'S, a cereal that does not exist in daylight."]
+      },
+      leftovers: {
+        ending: true,
+        title: "Leftovers, Found",
+        paragraphs: ["'We made a little society,' your voice calls from the fridge. 'The lasagna is mayor. The yogurt is a poet.' You decide not to interrupt local government.", "A container of last week's noodles slides out onto the shelf. It wears a paper crown. You close the door with a respectful bow."]
+      },
+      apology: {
+        ending: true,
+        title: "A Chilling Truce",
+        paragraphs: ["You apologize. The fridge gives one soft, forgiving beep. A perfectly wrapped slice of cake appears on the counter, labeled 'FOR THE APOLOGY.'", "You eat it in the dark. It tastes faintly of the sea and excellent conflict resolution."]
+      },
+      inside: {
+        ending: true,
+        title: "The Cold Open",
+        paragraphs: ["The fridge opens onto a moonlit beach. Your leftovers sit in tiny beach chairs. The milk wears sunglasses. A version of you waves from the horizon, holding a sandwich and a clipboard.", "You step in. The door closes. In the morning, the fridge hums normally—and one magnet now says 'BACK SOON.'"]
+      },
+      manager: {
+        ending: true,
+        title: "Your Call Is Important to Us",
+        paragraphs: ["A little bell rings inside the fridge. Hold music plays: a kazoo rendition of a song you almost remember. A customer-service voice thanks you for your patience and offers a coupon for one (1) haunted pudding.", "You accept. The pudding accepts you back. Nobody is sure what that means."]
+      },
+      unplug: {
+        ending: true,
+        title: "Power Down",
+        paragraphs: ["You pull the plug. The humming stops. For one perfect second, the kitchen is silent. Then the fridge whispers, 'Battery backup,' and displays a tiny green smiley face.", "You plug it back in. The smiley face changes to a thumbs-up. You decide that tomorrow is a good day to buy a mini fridge."]
+      }
+    };
+
+    const story = document.getElementById("story");
+    const choices = document.getElementById("choices");
+    const count = document.getElementById("scene-count");
+
+    function showScene(id) {
+      const scene = scenes[id];
+      story.replaceChildren();
+      choices.replaceChildren();
+      count.textContent = scene.ending ? "— THE END —" : `SCENE ${scene.number} / 8`;
+      if (scene.ending) {
+        const title = document.createElement("p");
+        title.className = "ending-title";
+        title.textContent = scene.title;
+        story.append(title);
+      }
+      scene.paragraphs.forEach(text => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = text;
+        story.append(paragraph);
+      });
+      if (scene.ending) {
+        const restart = document.createElement("button");
+        restart.className = "restart";
+        restart.type = "button";
+        restart.textContent = "↺ Start over";
+        restart.addEventListener("click", () => showScene("bed"));
+        choices.append(restart);
+        restart.focus();
+        return;
+      }
+      scene.choices.forEach(([label, next]) => {
+        const button = document.createElement("button");
+        button.className = "choice";
+        button.type = "button";
+        button.textContent = label;
+        button.addEventListener("click", () => showScene(next));
+        choices.append(button);
+      });
+      choices.querySelector("button")?.focus();
+    }
+
+    showScene("bed");
+  </script>
+</body>
+</html>
